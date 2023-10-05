@@ -1,0 +1,29 @@
+import bs4
+import requests
+#расчет количества страниц
+url = 'https://rosndv.ru/moskovskaja-oblast/garazh-mashinomesto/kupit/garazh/?c=1388&lt=list&page=1'
+response = requests.get(url)
+bs = bs4.BeautifulSoup(response.text,"lxml")
+pg_count = bs.find_all('a', 'page-link j-pgn-page')
+n = int(str.strip(pg_count[-2].text))
+#подготовка первой части ссылки
+url_p1 = 'https://rosndv.ru/moskovskaja-oblast/garazh-mashinomesto/kupit/garazh/?c=1388&lt=list&page='
+count = 1 # сквозной счетчик, начинаем с 1
+#цикл по количеству страниц (в конце отличается только одной цифрой)
+for a in range(1, n + 1):
+    response = requests.get(url_p1 + str(a))
+    #print(response) #проверочный код, оставляем на всякий случай
+    bs = bs4.BeautifulSoup(response.text,"lxml")
+    #списки цен и описаний
+    prices = bs.find_all('span', 'it-price')
+    quotes = bs.find_all('div', 'it-item-desc')
+    
+    i = 0 #итератор для вывода текста в цикле
+
+    #цикл по объявлениям на странице
+    for k in prices:
+        print(count, str.strip(k.text), str.strip(quotes[i].text), sep="|||", end="")
+        print()
+        print('------')
+        i += 1
+        count += 1
